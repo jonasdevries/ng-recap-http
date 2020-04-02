@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import {map} from 'rxjs/operators';
 import {Post} from './post.module';
 import {environment} from '../environments/environment';
+import {PostsService} from "./posts.service";
 
 @Component({
   selector: 'app-root',
@@ -13,41 +14,24 @@ export class AppComponent implements OnInit {
   loadedPosts: Post[] = [];
   isFetching = false;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private postService: PostsService) {}
 
   ngOnInit() {
-    this.fetchPosts();
+    this.isFetching = true;
+    this.postService.fetchPosts()
+      .subscribe(posts => {
+        this.isFetching = false;
+        this.loadedPosts = posts;
+      });
   }
 
   onCreatePost(postData: { title: string; content: string }) {
-    // Send Http request
-    this.http
-      .post<{name: string}>(
-        environment.firebaseUrl + '/posts.json',
-        postData
-      )
-      .subscribe(responseData => {
-        console.log(responseData);
-      });
-
+   this.postService.createPost(postData.title, postData.content);
   }
 
   onFetchPosts() {
-    this.fetchPosts();
-  }
-
-  private fetchPosts() {
     this.isFetching = true;
-    this.http.get<{ [key: string]: Post}>(environment.firebaseUrl + '/posts.json')
-      .pipe(map(responseData => {
-        const postsArray: Post[] = [];
-        for (const key in responseData) {
-          if (responseData.hasOwnProperty(key)) {
-            postsArray.push({...responseData[key], id: key});
-          }
-        }
-        return postsArray;
-      }))
+    this.postService.fetchPosts()
       .subscribe(posts => {
         this.isFetching = false;
         this.loadedPosts = posts;
@@ -55,7 +39,10 @@ export class AppComponent implements OnInit {
   }
 
   onClearPosts() {
-    // Send Http request
+    this.postService.deletePosts()
+      .subscribe(() => {
+        this.loadedPosts = [];
+      });
   }
 
 }
