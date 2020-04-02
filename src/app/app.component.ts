@@ -10,11 +10,10 @@ import {environment} from '../environments/environment';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  loadedPosts = [];
+  loadedPosts: Post[] = [];
+  isFetching = false;
 
-  constructor(private http: HttpClient) {
-    console.log(environment.firebaseUrl);
-  }
+  constructor(private http: HttpClient) {}
 
   ngOnInit() {
     this.fetchPosts();
@@ -38,6 +37,7 @@ export class AppComponent implements OnInit {
   }
 
   private fetchPosts() {
+    this.isFetching = true;
     this.http.get<{ [key: string]: Post}>(environment.firebaseUrl + '/posts.json')
       .pipe(map(responseData => {
         const postsArray: Post[] = [];
@@ -49,7 +49,8 @@ export class AppComponent implements OnInit {
         return postsArray;
       }))
       .subscribe(posts => {
-        console.log(posts);
+        this.isFetching = false;
+        this.loadedPosts = posts;
       });
   }
 
