@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Post} from './post.module';
 import {environment} from '../environments/environment';
 import {catchError, map} from 'rxjs/operators';
-import {Subject, throwError} from 'rxjs';
+import {pipe, Subject, throwError} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +29,11 @@ export class PostsService {
   }
 
   fetchPosts() {
-    return this.http.get<{ [key: string]: Post}>(environment.firebaseUrl + '/posts.json')
+    return this.http.get<{ [key: string]: Post}>(
+      environment.firebaseUrl + '/posts.json',
+      {
+        headers: new HttpHeaders({ 'custom-Header': 'hello' })
+      })
       .pipe(
         map(responseData => {
           const postsArray: Post[] = [];
