@@ -58,7 +58,8 @@ export class PostsService {
   deletePosts() {
     return this.http.delete(environment.firebaseUrl + '/posts.json',
       {
-        observe: 'events'
+        observe: 'events',
+        responseType: 'text'
       })
       .pipe(
         tap(event => {
